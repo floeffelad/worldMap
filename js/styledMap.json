@@ -1,0 +1,57 @@
+var styles =
+
+[
+  {
+    "featureType": "administrative",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  },{
+    "featureType": "poi",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  },{
+    "featureType": "road",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  },{
+    "featureType": "landscape",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  },{
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      { "visibility": "on" },
+      { "saturation": 100 },
+      { "gamma": 0.01 },
+      { "lightness": 100 },
+      { "weight": 0.7 }
+    ]
+  },{
+    "featureType": "landscape",
+    "elementType": "geometry.fill",
+    "stylers": [
+      { "hue": "#00ff22" },
+      { "saturation": 100 },
+      { "lightness": 67 },
+      { "visibility": "on" },
+      { "color": "#f1f1f1" }
+    ]
+  },{
+    "featureType": "water",
+    "stylers": [
+      { "visibility": "on" },
+      { "color": "#ffffff" }
+    ]
+  },{
+    "featureType": "landscape",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  }
+]
