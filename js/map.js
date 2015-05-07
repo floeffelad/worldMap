@@ -3,19 +3,20 @@
 var map;
 var infoboxGallery;
 var cities = [
-  ['London', 51.5072, 0.1275, 'England', 5],
-  ['New York', 40.7127, -74.0059, 'USA', 5],
-  ['Barcelona', 41.387128, 2.168564999999944, 'Spanien', 5],
-  ['Paris', 48.856614, 2.3522219000000177, 'Frankreich', 5],
+  ['London', 51.5072, 0.1275, 'England', 'images/England/London', 5],
+  ['New York', 40.7127, -74.0059, 'USA', 'images/USA/NewYork', 5],
+  ['Barcelona', 41.387128, 2.168564999999944, 'Spanien', 'images/Spain/Barcelona', 5],
+  ['Paris', 48.856614, 2.3522219000000177, 'Frankreich', 'images/France/Paris', 5],
   //['Maroubra Beach', -33.950198, 151.259302, 1]
   ];
 
 
 function initialize() {
+
   var mapOptions = {
     zoom: 3,
     minZoom:3,
-    maxZoom:8,
+    maxZoom:5,
     center: new google.maps.LatLng(18.1500, -15.9667),
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: true,
@@ -43,6 +44,7 @@ function initialize() {
     mapTypeControl: false,
   }
 
+
     var styledMap = new google.maps.StyledMapType(styles,
       {name: "Styled Map"});
 
@@ -60,17 +62,19 @@ function initialize() {
 
 
 function setMarkers(map, locations) {
-  // Add markers to the map
-
-  // Marker sizes are expressed as a Size of X,Y
-  // where the origin of the image (0,0) is located
-  // in the top left of the image.
-
-  // Origins, anchor positions and coordinates of the marker
-  // increase in the X direction to the right and in
-  // the Y direction down.
+ 
   var image = {
     url: 'img/point.png',
+    // This marker is 20 pixels wide by 32 pixels tall.
+    size: new google.maps.Size(16, 16),
+    // The origin for this image is 0,0.
+    origin: new google.maps.Point(0,0),
+    // The anchor for this image is the base of the flagpole at 0,32.
+    anchor: new google.maps.Point(8, 8)
+  };
+
+  var imageOver={
+    url: 'img/pointOver.png',
     // This marker is 20 pixels wide by 32 pixels tall.
     size: new google.maps.Size(20, 20),
     // The origin for this image is 0,0.
@@ -100,11 +104,18 @@ function setMarkers(map, locations) {
         draggable: false,
         name: cities[0],
         country: cities[3],
-        zIndex: cities[4]
+        imgsrc: cities[4],
+        zIndex: cities[5]
+    });
+
+    google.maps.event.addListener(marker, "mouseover", function() {
+    this.setIcon(imageOver);
+    });
+    google.maps.event.addListener(marker, "mouseout", function() {
+    this.setIcon(image);
     });
 
     google.maps.event.addListener(marker, "mouseover", function(){ showCity(this)});
-
 
     google.maps.event.addListener(marker, "mouseout", function (event) {
     //Open the Glastonbury info box.
@@ -154,7 +165,6 @@ function showCity(city) {
     //Changes the z-index property of the marker to make the marker appear on top of other markers.
     city.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
 }
-  
 
   
 function showGallery(city) {
@@ -166,7 +176,7 @@ function showGallery(city) {
 
 console.log(city);
   var content = [
-          ['<div id="carousel-example-generic" class="carousel slide" data-ride="carousel"><ol class="carousel-indicators"><li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li><li data-target="#carousel-example-generic" data-slide-to="1"></li><li data-target="#carousel-example-generic" data-slide-to="2"></li></ol><div class="carousel-inner"><div class="item active"><img src="http://placehold.it/300x450/09f/fff" alt=""><div class="carousel-caption"><h3>Caption Text</h3></div></div><div class="item"><img src="http://placehold.it/300x450/09f/fff" alt=""><div class="carousel-caption"><h3>Caption Text</h3></div></div><div class="item"><img src="http://placehold.it/300x450/09f/fff" alt=""><div class="carousel-caption"><h3>Caption Text</h3></div></div></div><a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a><a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'],
+          ['<div id="carousel-example-generic" class="carousel slide" data-ride="carousel"><ol class="carousel-indicators"><li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li><li data-target="#carousel-example-generic" data-slide-to="1"></li><li data-target="#carousel-example-generic" data-slide-to="2"></li></ol><div class="carousel-inner"></div><a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a><a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'],
           ['<div id="info"><h1>'+city.name+'</h1><h2>'+city.country+'</h2><p>'+'Latitude: ' + city.position.D +
     '<br>Longitude: ' + city.position.k+'</p></div>']
         ];
@@ -223,10 +233,33 @@ console.log(city);
       $('.carousel-indicators li').click(function() {
           $('.carousel-inner').carousel(parseInt($(this).attr('data-slide-to')));
       });
+
+      ajax_json_gallery(city.imgsrc, content);
   });
   
 }
   
+function ajax_json_gallery(folder, content){
+  //var thumbnailbox = document.getElementById("pics");
+    var hr = new XMLHttpRequest();
+    hr.open("POST", "json_gallery_data.php", true);
+    hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    hr.onreadystatechange = function() {
+      if(hr.readyState == 4 && hr.status == 200) {
+        var d = JSON.parse(hr.responseText);
+      //thumbnailbox.innerHTML = "";
+      for(var o in d){
+        if(d[o].src){
+
+            $(".carousel-inner").append('<div class="item"><img src="'+d[o].src+'"><div class="carousel-caption"><h3>Caption Text</h3></div></div>');
+            $(".item:first").attr("class","item active");
+        }
+      }
+      }
+    }
+    hr.send("folder="+folder);
+    //thumbnailbox.innerHTML = "requesting...";
+}
 
 function setZoomWhenMarkerClicked(){
   var currentZoom = map.getZoom();
@@ -259,11 +292,13 @@ var worldCoordinateNewCenter = new google.maps.Point(
 
 var newCenter = map.getProjection().fromPointToLatLng(worldCoordinateNewCenter);
 
-map.setCenter(newCenter);
+map.panTo(newCenter);
 
 }
 
 }
+
+
 
 
 
