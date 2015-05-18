@@ -14,8 +14,8 @@ var cities = [
 function initialize() {
 
   var mapOptions = {
-    zoom: 3,
-    minZoom:3,
+    zoom: 2,
+    minZoom:2,
     maxZoom:5,
     center: new google.maps.LatLng(18.1500, -15.9667),
     mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -53,10 +53,31 @@ function initialize() {
 
 
     //Associate the styled map with the MapTypeId and set it to display.
-    map.mapTypes.set('map_style', styledMap);
-    map.setMapTypeId('map_style');
+    
 
+var mapBounds = new google.maps.LatLngBounds(
+              new google.maps.LatLng(-85.05112878, -180),
+              new google.maps.LatLng(85.05112878, 179.9603703));
+var mapMinZoom = 2;
+          var mapMaxZoom = 5;
+
+var overlay = new klokantech.MapTilerMapType(map, function(x,y,z) {
+          return "/worldmap/Tiles/{z}/{x}/{y}.png".replace('{z}',z).replace('{x}',x).replace('{y}',y); },
+        mapBounds, mapMinZoom, mapMaxZoom);
+
+        map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+        var opacitycontrol = new klokantech.OpacityControl(map, overlay);
+
+        map.fitBounds(mapBounds);
+
+map.mapTypes.set('map_style', styledMap);
+    map.setMapTypeId('map_style');
     setMarkers(map, cities);
+
+
+google.maps.event.addListener(map, 'bounds_changed', function() {
+         console.log(map.getBounds());
+      });
 }
 
 
@@ -123,7 +144,6 @@ function setMarkers(map, locations) {
     //Changes the z-index property of the marker to make the marker appear on top of other markers.
     this.setZIndex(google.maps.Marker.MAX_ZINDEX - 1);
     });
-
     google.maps.event.addListener(marker, "click", function(){ showGallery(this)});
 }
 
@@ -149,7 +169,8 @@ function showCity(city) {
    ,pixelOffset: new google.maps.Size(0, -50)
    ,zIndex: null
    ,boxStyle: {
-   opacity: 1
+    opacity: 1
+    ,width: "280px"
    }
    ,closeBoxMargin: false
    ,closeBoxURL: ""
@@ -177,8 +198,8 @@ function showGallery(city) {
 console.log(city);
   var content = [
           ['<div id="carousel-example-generic" class="carousel slide" data-ride="carousel"><ol class="carousel-indicators"><li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li><li data-target="#carousel-example-generic" data-slide-to="1"></li><li data-target="#carousel-example-generic" data-slide-to="2"></li></ol><div class="carousel-inner"></div><a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a><a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'],
-          ['<div id="info"><h1>'+city.name+'</h1><h2>'+city.country+'</h2><p>'+'Latitude: ' + city.position.D +
-    '<br>Longitude: ' + city.position.k+'</p></div>']
+          ['<div id="info"><h1>'+city.name+'</h1><h2>'+city.country+'</h2><p>'+'Latitude: ' + city.position.A +
+    '<br>Longitude: ' + city.position.F +'</p></div>']
         ];
 
   //var galleryStyle = "border: 0px solid black; background-color: #4D4D4D; padding:5px; margin-top: 8px; border-radius:3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; box-shadow: 1px 1px #888;";
