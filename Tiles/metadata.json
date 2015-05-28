@@ -1,0 +1,12 @@
+{
+  "name": "Tiles",
+  "version": "1.0.0",
+  "description": "",
+  "type": "overlay",
+  "format": "png",
+  "minzoom": "2",
+  "maxzoom": "5",
+  "bounds": "-179.99999997,-85.05112878,179.99999997,85.05112878",
+  "scale": "2",
+  "profile": "mercator"
+}

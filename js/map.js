@@ -1,7 +1,11 @@
-
-//Create the variable for the main map itself.
+//Variable for the main map and cities array.
 var map;
 var infoboxGallery;
+
+var allowedBounds = new google.maps.LatLngBounds(
+                    new google.maps.LatLng(-55.05112878, -180),
+                    new google.maps.LatLng(55.05112878, 180));
+
 var cities = [
   ['London', 51.5072, 0.1275, 'England', 'images/England/London', 5],
   ['New York', 40.7127, -74.0059, 'USA', 'images/USA/NewYork', 5],
@@ -11,11 +15,49 @@ var cities = [
   ];
 
 
+ 
+ // -- ZoomControl +/- buttons for the map
+function ZoomControl(controlDiv, map) {
+  
+  // Creating divs & styles for custom zoom control
+  controlDiv.style.padding = '5px';
+
+  // Set CSS for the control wrapper
+  var controlWrapper = document.createElement('div');
+  controlWrapper.style.cursor = 'pointer';
+  controlWrapper.innerHTML = '<h4 class="zoom">ZOOM</h4>';
+  controlWrapper.style.textAlign = 'center';
+  controlWrapper.style.width = '32px'; 
+  controlWrapper.style.height = '64px';
+  controlDiv.appendChild(controlWrapper);
+
+  
+  var zoomInButton = document.createElement('div');
+  zoomInButton.innerHTML = '<button class="round-button">+</button>';
+  controlWrapper.appendChild(zoomInButton);
+  
+  var zoomOutButton = document.createElement('div');
+  zoomOutButton.innerHTML = '<button class="round-button">-</button>';
+  controlWrapper.appendChild(zoomOutButton);
+
+  // Setup the click event listener - zoomIn
+  google.maps.event.addDomListener(zoomInButton, 'click', function() {
+    map.setZoom(map.getZoom() + 1);
+  });
+    
+  // Setup the click event listener - zoomOut
+  google.maps.event.addDomListener(zoomOutButton, 'click', function() {
+    map.setZoom(map.getZoom() - 1);
+  });   
+}
+
+
+
 function initialize() {
 
   var mapOptions = {
-    zoom: 2,
-    minZoom:2,
+    zoom: 3,
+    minZoom:3,
     maxZoom:5,
     center: new google.maps.LatLng(18.1500, -15.9667),
     mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -24,11 +66,11 @@ function initialize() {
         style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
         position: google.maps.ControlPosition.BOTTOM_CENTER
     },
-    panControl: true,
+    panControl: false,
     panControlOptions: {
         position: google.maps.ControlPosition.TOP_RIGHT
     },
-    zoomControl: true,
+    zoomControl: false,
     zoomControlOptions: {
         style: google.maps.ZoomControlStyle.SMALL,
         position: google.maps.ControlPosition.LEFT_CENTER
@@ -45,39 +87,73 @@ function initialize() {
   }
 
 
-    var styledMap = new google.maps.StyledMapType(styles,
-      {name: "Styled Map"});
+  var styledMap = new google.maps.StyledMapType(styles,
+    {name: "Styled Map"});
 
-    var map = new google.maps.Map(document.getElementById('map_canvas'),
-      mapOptions);
+  var map = new google.maps.Map(document.getElementById('map_canvas'),
+    mapOptions);
 
 
-    //Associate the styled map with the MapTypeId and set it to display.
+  //Associate the styled map with the MapTypeId and set it to display.
     
+  var mapBounds = new google.maps.LatLngBounds(
+                  new google.maps.LatLng(-85.05112878, -180),
+                  new google.maps.LatLng(85.05112878, 179.9603703));
+  
+  var mapMinZoom = 2;
+  var mapMaxZoom = 5;
 
-var mapBounds = new google.maps.LatLngBounds(
-              new google.maps.LatLng(-85.05112878, -180),
-              new google.maps.LatLng(85.05112878, 179.9603703));
-var mapMinZoom = 2;
-          var mapMaxZoom = 5;
+  // Create the DIV to hold the control and call the ZoomControl() constructor
+  // passing in this DIV.
+  
+  var zoomControlDiv = document.createElement('div');
+  var zoomControl = new ZoomControl(zoomControlDiv, map);
 
-var overlay = new klokantech.MapTilerMapType(map, function(x,y,z) {
+  zoomControlDiv.index = 1;
+  map.controls[google.maps.ControlPosition.LEFT_CENTER].push(zoomControlDiv);
+
+
+  var overlay = new klokantech.MapTilerMapType(map, function(x,y,z) {
           return "/worldmap/Tiles/{z}/{x}/{y}.png".replace('{z}',z).replace('{x}',x).replace('{y}',y); },
-        mapBounds, mapMinZoom, mapMaxZoom);
+          mapBounds, mapMinZoom, mapMaxZoom);
 
-        map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-        var opacitycontrol = new klokantech.OpacityControl(map, overlay);
+          map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+          //var opacitycontrol = new klokantech.OpacityControl(map, overlay);
 
-        map.fitBounds(mapBounds);
+          map.fitBounds(mapBounds);
 
-map.mapTypes.set('map_style', styledMap);
-    map.setMapTypeId('map_style');
-    setMarkers(map, cities);
+      map.mapTypes.set('map_style', styledMap);
+      map.setMapTypeId('map_style');
+      setMarkers(map, cities);
 
 
-google.maps.event.addListener(map, 'bounds_changed', function() {
-         console.log(map.getBounds());
-      });
+  google.maps.event.addListener(map, 'bounds_changed', function() {
+           console.log(map.getBounds());
+        });
+
+  google.maps.event.addListener(map,'center_changed',function() { checkBounds(); });
+
+
+  function checkBounds() {    
+    if(! allowedBounds.contains(map.getCenter())) {
+      var C = map.getCenter();
+      var X = C.lng();
+      var Y = C.lat();
+
+      var AmaxX = allowedBounds.getNorthEast().lng();
+      var AmaxY = allowedBounds.getNorthEast().lat();
+      var AminX = allowedBounds.getSouthWest().lng();
+      var AminY = allowedBounds.getSouthWest().lat();
+
+      if (X < AminX) {X = AminX;}
+      if (X > AmaxX) {X = AmaxX;}
+      if (Y < AminY) {Y = AminY;}
+      if (Y > AmaxY) {Y = AmaxY;}
+
+      map.setCenter(new google.maps.LatLng(Y,X));
+    }
+  }
+
 }
 
 
@@ -150,16 +226,11 @@ function setMarkers(map, locations) {
 
 
 function showCity(city) {
-
-  //var pop_up_info = "background-color: #E10219; padding:10px; margin-left: 2px; text-align: center; font-color:#ffffff; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; height: auto; border-radius:2px; -moz-border-radius: 2px; -webkit-border-radius: 2px;";
-  
   
   var contentCity = [
-          ['<div class="polygon"><img src="../worldMap/img/arrow.png"/></div>'],
+          ['<div class="cityPolygon"><img src="../worldMap/img/arrow.png"/></div>'],
           ['<div class = "cityPopUp"><h4>'+ city.name +'</h4></div>']      
         ];
-
-  //boxTextCity.innerHTML = '<h4>'+ city.name +'</h4>''<svg height="210" width="500"><polygon points="200,10 250,190 160,210" style="fill:lime;stroke:purple;stroke-width:1" /></svg>';
 
   //Sets up the configuration options of the pop-up info box.
   var infoboxOptionsCity = {
@@ -188,27 +259,18 @@ function showCity(city) {
 }
 
   
+
 function showGallery(city) {
-    
       
   if (infoboxGallery) {
     infoboxGallery.close();
   }
-
-console.log(city);
+  console.log(city);
   var content = [
           ['<div id="carousel-example-generic" class="carousel slide" data-ride="carousel"><ol class="carousel-indicators"><li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li><li data-target="#carousel-example-generic" data-slide-to="1"></li><li data-target="#carousel-example-generic" data-slide-to="2"></li></ol><div class="carousel-inner"></div><a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a><a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a></div>'],
-          ['<div id="info"><h1>'+city.name+'</h1><h2>'+city.country+'</h2><p>'+'Latitude: ' + city.position.A +
+          ['<div id="info"><h2>'+city.name+'</h2><h3>'+city.country+'</h3><p>'+'Latitude: ' + city.position.A +
     '<br>Longitude: ' + city.position.F +'</p></div>']
         ];
-
-  //var galleryStyle = "border: 0px solid black; background-color: #4D4D4D; padding:5px; margin-top: 8px; border-radius:3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; box-shadow: 1px 1px #888;";
-  
-  //Creates the information to go in the pop-up info box.
-  //var boxTextGallery = document.createElement("div");
-  
-  //boxTextGallery.style.cssText = galleryStyle;
-  
 
   //Sets up the configuration options of the pop-up info box.
   var infoboxOptionsGallery = {
@@ -233,12 +295,10 @@ console.log(city);
   //Creates the pop-up infobox 
   infoboxGallery = new InfoBox(infoboxOptionsGallery);
   
-  //infoboxGallery.setContent($(boxTextGallery).clone().html());
-
   infoboxGallery.open(map, city);
+  
   //Zooms the map.
   //setZoomWhenMarkerClicked();
-  //Sets the Glastonbury marker to be the center of the map.
   
   offsetCenter(city.getPosition(), -200, 100);
   //map.setCenter(city.getPosition());
@@ -250,7 +310,7 @@ console.log(city);
           interval: false
       });
 
-      // Specify what you want the carousel to do when the .carousel-indicator is clicked
+      // Specify the carousel what to do when the .carousel-indicator is clicked
       $('.carousel-indicators li').click(function() {
           $('.carousel-inner').carousel(parseInt($(this).attr('data-slide-to')));
       });
@@ -262,66 +322,64 @@ console.log(city);
   
 function ajax_json_gallery(folder, content){
   //var thumbnailbox = document.getElementById("pics");
-    var hr = new XMLHttpRequest();
-    hr.open("POST", "json_gallery_data.php", true);
-    hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    hr.onreadystatechange = function() {
-      if(hr.readyState == 4 && hr.status == 200) {
-        var d = JSON.parse(hr.responseText);
-      //thumbnailbox.innerHTML = "";
-      for(var o in d){
-        if(d[o].src){
+  var hr = new XMLHttpRequest();
+  hr.open("POST", "json_gallery_data.php", true);
+  hr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  hr.onreadystatechange = function() {
+    if(hr.readyState == 4 && hr.status == 200) {
+      var d = JSON.parse(hr.responseText);
+    //thumbnailbox.innerHTML = "";
+    for(var o in d){
+      if(d[o].src){
 
-            $(".carousel-inner").append('<div class="item"><img src="'+d[o].src+'"><div class="carousel-caption"><h3>Caption Text</h3></div></div>');
-            $(".item:first").attr("class","item active");
-        }
-      }
+          $(".carousel-inner").append('<div class="item"><img src="'+d[o].src+'"><div class="carousel-caption"><h3>Caption Text</h3></div></div>');
+          $(".item:first").attr("class","item active");
       }
     }
-    hr.send("folder="+folder);
-    //thumbnailbox.innerHTML = "requesting...";
+    }
+  }
+  hr.send("folder="+folder);
+  //thumbnailbox.innerHTML = "requesting...";
 }
+
 
 function setZoomWhenMarkerClicked(){
   var currentZoom = map.getZoom();
   if (currentZoom < 6){
   map.setZoom(6);
- }
+  }
 }
+
 
 function offsetCenter(latlng,offsetx,offsety) {
 
-// latlng is the apparent centre-point
-// offsetx is the distance you want that point to move to the right, in pixels
-// offsety is the distance you want that point to move upwards, in pixels
-// offset can be negative
-// offsetx and offsety are both optional
+  // latlng is the apparent centre-point
+  // offsetx is the distance you want that point to move to the right, in pixels
+  // offsety is the distance you want that point to move upwards, in pixels
+  // offset can be negative
+  // offsetx and offsety are both optional
 
-var scale = Math.pow(2, map.getZoom());
-var nw = new google.maps.LatLng(
-    map.getBounds().getNorthEast().lat(),
-    map.getBounds().getSouthWest().lng()
-);
+  var scale = Math.pow(2, map.getZoom());
+  var nw = new google.maps.LatLng(
+      map.getBounds().getNorthEast().lat(),
+      map.getBounds().getSouthWest().lng()
+  );
 
-var worldCoordinateCenter = map.getProjection().fromLatLngToPoint(latlng);
-var pixelOffset = new google.maps.Point((offsetx/scale) || 0,(offsety/scale) ||0)
+  var worldCoordinateCenter = map.getProjection().fromLatLngToPoint(latlng);
+  var pixelOffset = new google.maps.Point((offsetx/scale) || 0,(offsety/scale) ||0)
 
-var worldCoordinateNewCenter = new google.maps.Point(
-    worldCoordinateCenter.x - pixelOffset.x,
-    worldCoordinateCenter.y + pixelOffset.y
-);
+  var worldCoordinateNewCenter = new google.maps.Point(
+      worldCoordinateCenter.x - pixelOffset.x,
+      worldCoordinateCenter.y + pixelOffset.y
+  );
 
-var newCenter = map.getProjection().fromPointToLatLng(worldCoordinateNewCenter);
+  var newCenter = map.getProjection().fromPointToLatLng(worldCoordinateNewCenter);
 
-map.panTo(newCenter);
-
-}
+  map.panTo(newCenter);
 
 }
 
-
-
-
+}
 
 //window.onload = loadScript;
 google.maps.event.addDomListener(window, 'load', initialize);

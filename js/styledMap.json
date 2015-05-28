@@ -17,41 +17,27 @@ var styles =
       { "visibility": "off" }
     ]
   },{
-    "featureType": "landscape",
+    "featureType": "transit",
     "stylers": [
       { "visibility": "off" }
     ]
   },{
-    "featureType": "administrative.country",
-    "elementType": "geometry.stroke",
+    "featureType": "water",
+    "elementType": "labels",
     "stylers": [
-      { "visibility": "on" },
-      { "saturation": 100 },
-      { "gamma": 0.01 },
-      { "lightness": 100 },
-      { "weight": 0.7 }
+      { "visibility": "off" }
     ]
   },{
     "featureType": "landscape",
-    "elementType": "geometry.fill",
     "stylers": [
-      { "hue": "#00ff22" },
-      { "saturation": 100 },
-      { "lightness": 67 },
-      { "visibility": "on" },
-      { "color": "#f1f1f1" }
+      { "color": "#ffffff" },
+      { "visibility": "simplified" }
     ]
   },{
     "featureType": "water",
     "stylers": [
-      { "visibility": "on" },
-      { "color": "#ffffff" }
-    ]
-  },{
-    "featureType": "landscape",
-    "elementType": "labels.text.fill",
-    "stylers": [
       { "visibility": "off" }
     ]
+  },{
   }
 ]
