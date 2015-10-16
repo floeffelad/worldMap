@@ -32,7 +32,7 @@ var map;
 var mapBounds = new google.maps.LatLngBounds(
     new google.maps.LatLng(-85.051129, -180.000000),
     new google.maps.LatLng(85.051129, 180.000000));
-var mapMinZoom = 2;
+var mapMinZoom = 1;
 var mapMaxZoom = 5;
 var maptiler = new google.maps.ImageMapType({
     getTileUrl: function(coord, zoom) { 
@@ -59,8 +59,8 @@ var maptiler = new google.maps.ImageMapType({
 function init() {
     var opts = {
         streetViewControl: false,
-        center: new google.maps.LatLng(0.000000, 0.000000),
-        zoom: 2
+        center: new google.maps.LatLng(-0.000000, 0.000000),
+        zoom: 1
     };
 	map = new google.maps.Map(document.getElementById("map"), opts);
 	map.setMapTypeId('satellite');

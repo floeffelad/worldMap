@@ -7,7 +7,7 @@ $dir = $folder."/";
 $dirHandle = opendir($dir); 
 $i = 0;
 while ($file = readdir($dirHandle)) {
-	if(!is_dir($file) && strpos($file, '.gif')){
+	if(!is_dir($file) && strpos($file, '.jpg')){
 		$i++;
 		$src = "$dir$file";
 $jsonData .= '"img'.$i.'":{ "num":"'.$i.'","src":"'.$src.'", "name":"'.$file.'" },';

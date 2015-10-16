@@ -2,12 +2,25 @@ var styles =
 
 [
   {
-    "featureType": "administrative",
+    "featureType": "poi",
     "stylers": [
       { "visibility": "off" }
     ]
   },{
-    "featureType": "poi",
+    "featureType": "water",
+    "stylers": [
+      { "visibility": "on" },
+      { "color": "#ffffff" }
+    ]
+  },{
+    "featureType": "administrative.locality",
+    "elementType": "labels",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  },{
+    "featureType": "administrative.country",
+    "elementType": "labels",
     "stylers": [
       { "visibility": "off" }
     ]
@@ -17,24 +30,27 @@ var styles =
       { "visibility": "off" }
     ]
   },{
-    "featureType": "transit",
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
     "stylers": [
-      { "visibility": "off" }
-    ]
-  },{
-    "featureType": "water",
-    "elementType": "labels",
-    "stylers": [
-      { "visibility": "off" }
+      { "color": "#ffffff" },
+      { "visibility": "on" }
     ]
   },{
     "featureType": "landscape",
     "stylers": [
-      { "color": "#ffffff" },
-      { "visibility": "simplified" }
+      { "color": "#ADB4B8" },
+      { "visibility": "on" }
     ]
   },{
-    "featureType": "water",
+    "featureType": "administrative.province",
+    "elementType": "geometry",
+    "stylers": [
+      { "visibility": "off" }
+    ]
+  },{
+    "featureType": "administrative",
+    "elementType": "labels",
     "stylers": [
       { "visibility": "off" }
     ]
